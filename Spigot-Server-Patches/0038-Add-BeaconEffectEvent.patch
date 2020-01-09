@@ -1,27 +1,26 @@
-From 871f28247f535e856bec4dc25075e67463e5391f Mon Sep 17 00:00:00 2001
+From d2e4d23521f1cc249c8ac8f6a5cc93c5c83240db Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Wed, 2 Mar 2016 23:30:53 -0600
 Subject: [PATCH] Add BeaconEffectEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/TileEntityBeacon.java b/src/main/java/net/minecraft/server/TileEntityBeacon.java
-index fecd65ddb..c6bd54a2c 100644
+index 69d59a9f88..e510234db5 100644
 --- a/src/main/java/net/minecraft/server/TileEntityBeacon.java
 +++ b/src/main/java/net/minecraft/server/TileEntityBeacon.java
-@@ -15,6 +15,12 @@ import org.bukkit.entity.HumanEntity;
+@@ -14,6 +14,11 @@ import org.bukkit.craftbukkit.potion.CraftPotionUtil;
+ import org.bukkit.entity.HumanEntity;
  import org.bukkit.potion.PotionEffect;
  // CraftBukkit end
- 
 +// Paper start
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.entity.Player;
 +import com.destroystokyo.paper.event.block.BeaconEffectEvent;
 +// Paper end
-+
- public class TileEntityBeacon extends TileEntityContainer implements IWorldInventory, ITickable {
  
-     public static final MobEffectList[][] a = new MobEffectList[][] { { MobEffects.FASTER_MOVEMENT, MobEffects.FASTER_DIG}, { MobEffects.RESISTANCE, MobEffects.JUMP}, { MobEffects.INCREASE_DAMAGE}, { MobEffects.REGENERATION}};
-@@ -129,14 +135,31 @@ public class TileEntityBeacon extends TileEntityContainer implements IWorldInven
+ public class TileEntityBeacon extends TileEntity implements ITileInventory, ITickable {
+ 
+@@ -242,14 +247,31 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory, ITic
      }
  
      private void applyEffect(List list, MobEffectList effects, int i, int b0) {
@@ -54,7 +53,7 @@ index fecd65ddb..c6bd54a2c 100644
              }
          }
      }
-@@ -158,10 +181,10 @@ public class TileEntityBeacon extends TileEntityContainer implements IWorldInven
+@@ -272,10 +294,10 @@ public class TileEntityBeacon extends TileEntity implements ITileInventory, ITic
              int i = getLevel();
              List list = getHumansInRange();
  
@@ -68,5 +67,5 @@ index fecd65ddb..c6bd54a2c 100644
          }
  
 -- 
-2.20.1
+2.22.0
 

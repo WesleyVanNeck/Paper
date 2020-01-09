@@ -1,4 +1,4 @@
-From 598ca05d30454f06b4b08c9080ad038b0ffcb8d5 Mon Sep 17 00:00:00 2001
+From 8150d2e2f980098303ea44b05391d21b75f78a96 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 28 Dec 2016 01:18:55 -0500
 Subject: [PATCH] Fireworks API's
@@ -7,7 +7,7 @@ Get the Entity being boosted
 Get the firework launcher
 
 diff --git a/src/main/java/org/bukkit/entity/Firework.java b/src/main/java/org/bukkit/entity/Firework.java
-index 1c55f0338..7df26cf7f 100644
+index f844d5aa..e8c04c13 100644
 --- a/src/main/java/org/bukkit/entity/Firework.java
 +++ b/src/main/java/org/bukkit/entity/Firework.java
 @@ -3,6 +3,9 @@ package org.bukkit.entity;
@@ -20,10 +20,10 @@ index 1c55f0338..7df26cf7f 100644
  public interface Firework extends Entity {
  
      /**
-@@ -25,4 +28,15 @@ public interface Firework extends Entity {
-      * remaining fuse.
+@@ -43,4 +46,15 @@ public interface Firework extends Entity {
+      * @param shotAtAngle the new shotAtAngle
       */
-     void detonate();
+     void setShotAtAngle(boolean shotAtAngle);
 +
 +    // Paper start
 +    @Nullable
@@ -37,5 +37,5 @@ index 1c55f0338..7df26cf7f 100644
 +    // Paper end
  }
 -- 
-2.21.0
+2.23.0
 

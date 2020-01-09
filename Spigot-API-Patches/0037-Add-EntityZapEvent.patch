@@ -1,4 +1,4 @@
-From d83973b95e1f261cb7d70b06771709d73a73624f Mon Sep 17 00:00:00 2001
+From f85769e8ba9c1aa2b67b14ed2c91ad26f639801f Mon Sep 17 00:00:00 2001
 From: AlphaBlend <whizkid3000@hotmail.com>
 Date: Sun, 16 Oct 2016 23:19:34 -0700
 Subject: [PATCH] Add EntityZapEvent
@@ -76,7 +76,7 @@ index 000000000..3b725a489
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/event/entity/PigZapEvent.java b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
-index 0074423fd..0eaa8df94 100644
+index 0e0ed93b5..d3949edfc 100644
 --- a/src/main/java/org/bukkit/event/entity/PigZapEvent.java
 +++ b/src/main/java/org/bukkit/event/entity/PigZapEvent.java
 @@ -2,6 +2,7 @@ package org.bukkit.event.entity;
@@ -105,7 +105,7 @@ index 0074423fd..0eaa8df94 100644
          this.bolt = bolt;
          this.pigzombie = pigzombie;
      }
-@@ -61,6 +62,8 @@ public class PigZapEvent extends EntityTransformEvent implements Cancellable {
+@@ -63,6 +64,8 @@ public class PigZapEvent extends EntityTransformEvent implements Cancellable {
          return pigzombie;
      }
  
@@ -114,7 +114,7 @@ index 0074423fd..0eaa8df94 100644
      @NotNull
      @Override
      public HandlerList getHandlers() {
-@@ -71,4 +74,6 @@ public class PigZapEvent extends EntityTransformEvent implements Cancellable {
+@@ -73,4 +76,6 @@ public class PigZapEvent extends EntityTransformEvent implements Cancellable {
      public static HandlerList getHandlerList() {
          return handlers;
      }

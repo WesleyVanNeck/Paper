@@ -1,4 +1,4 @@
-From 22047d54062fe5f973526c035e3a8ed652aba5e8 Mon Sep 17 00:00:00 2001
+From dab65a988fe0797faad9731359cfd9b36751931b Mon Sep 17 00:00:00 2001
 From: Steve Anton <anxuiz.nx@gmail.com>
 Date: Thu, 3 Mar 2016 00:09:38 -0600
 Subject: [PATCH] Add PlayerInitialSpawnEvent
@@ -6,31 +6,31 @@ Subject: [PATCH] Add PlayerInitialSpawnEvent
 For modifying a player's initial spawn location as they join the server
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index c2bb79fe8..4f9c97a08 100644
+index 1652a57e2..948a6e3b7 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -109,6 +109,21 @@ public abstract class PlayerList {
+@@ -109,7 +109,20 @@ public abstract class PlayerList {
          }
          // CraftBukkit end
  
+-        entityplayer.spawnIn(worldserver);
 +        // Paper start - support PlayerInitialSpawnEvent
-+        Location originalLoc = new Location(entityplayer.world.getWorld(), entityplayer.locX, entityplayer.locY, entityplayer.locZ, entityplayer.yaw, entityplayer.pitch);
++        Location originalLoc = new Location(entityplayer.world.getWorld(), entityplayer.locX(), entityplayer.locY(), entityplayer.locZ(), entityplayer.yaw, entityplayer.pitch);
 +        com.destroystokyo.paper.event.player.PlayerInitialSpawnEvent event = new com.destroystokyo.paper.event.player.PlayerInitialSpawnEvent(entityplayer.getBukkitEntity(), originalLoc);
 +        this.server.server.getPluginManager().callEvent(event);
 +
 +        Location newLoc = event.getSpawnLocation();
 +        entityplayer.world = ((CraftWorld) newLoc.getWorld()).getHandle();
-+        entityplayer.locX = newLoc.getX();
-+        entityplayer.locY = newLoc.getY();
-+        entityplayer.locZ = newLoc.getZ();
++        entityplayer.setPositionRaw(newLoc.getX(), newLoc.getY(), newLoc.getZ());
 +        entityplayer.yaw = newLoc.getYaw();
 +        entityplayer.pitch = newLoc.getPitch();
-+        entityplayer.dimension = ((CraftWorld) newLoc.getWorld()).getHandle().dimension;
++        entityplayer.dimension = ((CraftWorld) newLoc.getWorld()).getHandle().worldProvider.getDimensionManager();
 +        // Paper end
 +
-         entityplayer.spawnIn(this.server.getWorldServer(entityplayer.dimension));
++        entityplayer.spawnIn(((CraftWorld) newLoc.getWorld()).getHandle());
          entityplayer.playerInteractManager.a((WorldServer) entityplayer.world);
          String s1 = "local";
+ 
 -- 
-2.20.1
+2.24.0
 

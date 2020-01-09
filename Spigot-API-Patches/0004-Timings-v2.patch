@@ -1,4 +1,4 @@
-From eb2e4ca41e4f961fedc2ff7a79ce3031e50d2d07 Mon Sep 17 00:00:00 2001
+From bbf376e0410c47c16785ba43f2223235d9f888bc Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Mon, 29 Feb 2016 18:48:17 -0600
 Subject: [PATCH] Timings v2
@@ -709,7 +709,7 @@ index 00000000..cc0390c0
 +}
 diff --git a/src/main/java/co/aikar/timings/TimingHistory.java b/src/main/java/co/aikar/timings/TimingHistory.java
 new file mode 100644
-index 00000000..04369523
+index 00000000..ddaed812
 --- /dev/null
 +++ b/src/main/java/co/aikar/timings/TimingHistory.java
 @@ -0,0 +1,354 @@
@@ -859,7 +859,7 @@ index 00000000..04369523
 +                                        public JSONPair apply(Map.Entry<EntityType, Counter> entry) {
 +                                            entityTypeSet.add(entry.getKey());
 +                                            return pair(
-+                                                    String.valueOf(entry.getKey().getTypeId()),
++                                                    String.valueOf(entry.getKey().ordinal()),
 +                                                    entry.getValue().count()
 +                                            );
 +                                        }
@@ -872,7 +872,7 @@ index 00000000..04369523
 +                                        public JSONPair apply(Map.Entry<Material, Counter> entry) {
 +                                            tileEntityTypeSet.add(entry.getKey());
 +                                            return pair(
-+                                                    String.valueOf(entry.getKey().getId()),
++                                                    String.valueOf(entry.getKey().ordinal()),
 +                                                    entry.getValue().count()
 +                                            );
 +                                        }
@@ -1682,7 +1682,7 @@ index 00000000..c0d8f201
 +}
 diff --git a/src/main/java/co/aikar/timings/TimingsExport.java b/src/main/java/co/aikar/timings/TimingsExport.java
 new file mode 100644
-index 00000000..65d312b0
+index 00000000..23eb8c65
 --- /dev/null
 +++ b/src/main/java/co/aikar/timings/TimingsExport.java
 @@ -0,0 +1,355 @@
@@ -1799,7 +1799,7 @@ index 00000000..65d312b0
 +        );
 +        if (!TimingsManager.privacy) {
 +            appendObjectData(parent,
-+                pair("server", Bukkit.getServerName()),
++                pair("server", Bukkit.getUnsafe().getTimingsServerName()),
 +                pair("motd", Bukkit.getServer().getMotd()),
 +                pair("online-mode", Bukkit.getServer().getOnlineMode()),
 +                pair("icon", Bukkit.getServer().getServerIcon().getData())
@@ -1872,9 +1872,9 @@ index 00000000..65d312b0
 +            pair("handlers", handlers),
 +            pair("worlds", toObjectMapper(TimingHistory.worldMap.entrySet(), input -> pair(input.getValue(), input.getKey()))),
 +            pair("tileentity",
-+                toObjectMapper(tileEntityTypeSet, input -> pair(input.getId(), input.name()))),
++                toObjectMapper(tileEntityTypeSet, input -> pair(input.ordinal(), input.name()))),
 +            pair("entity",
-+                toObjectMapper(entityTypeSet, input -> pair(input.getTypeId(), input.name())))
++                toObjectMapper(entityTypeSet, input -> pair(input.ordinal(), input.name())))
 +        ));
 +
 +        // Information about loaded plugins
@@ -1976,8 +1976,8 @@ index 00000000..65d312b0
 +            String hostName = "BrokenHost";
 +            try {
 +                hostName = InetAddress.getLocalHost().getHostName();
-+            } catch(Exception ignored) {}
-+            con.setRequestProperty("User-Agent", "Paper/" + Bukkit.getServerName() + "/" + hostName);
++            } catch (Exception ignored) {}
++            con.setRequestProperty("User-Agent", "Paper/" + Bukkit.getUnsafe().getTimingsServerName() + "/" + hostName);
 +            con.setRequestMethod("POST");
 +            con.setInstanceFollowRedirects(false);
 +
@@ -3139,10 +3139,10 @@ index 00000000..5989ee21
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index a3c4b148..7e416f08 100644
+index 0822b8e5..940c643d 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -602,7 +602,6 @@ public final class Bukkit {
+@@ -574,7 +574,6 @@ public final class Bukkit {
       */
      public static void reload() {
          server.reload();
@@ -3151,10 +3151,10 @@ index a3c4b148..7e416f08 100644
  
      /**
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 2767f4e5..5b5a3bc5 100644
+index 11c5c205..c197e381 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -1276,6 +1276,26 @@ public interface Server extends PluginMessageRecipient {
+@@ -1250,6 +1250,26 @@ public interface Server extends PluginMessageRecipient {
              throw new UnsupportedOperationException( "Not supported yet." );
          }
  
@@ -3181,6 +3181,23 @@ index 2767f4e5..5b5a3bc5 100644
          /**
           * Sends the component to the player
           *
+diff --git a/src/main/java/org/bukkit/UnsafeValues.java b/src/main/java/org/bukkit/UnsafeValues.java
+index 247d194f..72c5501e 100644
+--- a/src/main/java/org/bukkit/UnsafeValues.java
++++ b/src/main/java/org/bukkit/UnsafeValues.java
+@@ -69,4 +69,12 @@ public interface UnsafeValues {
+      * @return true if a file matching this key was found and deleted
+      */
+     boolean removeAdvancement(NamespacedKey key);
++
++    // Paper start
++    /**
++     * Server name to report to timings v2
++     * @return name
++     */
++    String getTimingsServerName();
++    // Paper end
+ }
 diff --git a/src/main/java/org/bukkit/command/BufferedCommandSender.java b/src/main/java/org/bukkit/command/BufferedCommandSender.java
 new file mode 100644
 index 00000000..f9a00aec
@@ -3209,10 +3226,10 @@ index 00000000..f9a00aec
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/command/Command.java b/src/main/java/org/bukkit/command/Command.java
-index dafc4ed9..c2c19ed4 100644
+index 4bfc2146..03bdc162 100644
 --- a/src/main/java/org/bukkit/command/Command.java
 +++ b/src/main/java/org/bukkit/command/Command.java
-@@ -35,7 +35,8 @@ public abstract class Command {
+@@ -33,7 +33,8 @@ public abstract class Command {
      protected String usageMessage;
      private String permission;
      private String permissionMessage;
@@ -3222,7 +3239,7 @@ index dafc4ed9..c2c19ed4 100644
  
      protected Command(@NotNull String name) {
          this(name, "", "/" + name, new ArrayList<String>());
-@@ -49,7 +50,6 @@ public abstract class Command {
+@@ -47,7 +48,6 @@ public abstract class Command {
          this.usageMessage = (usageMessage == null) ? "/" + name : usageMessage;
          this.aliases = aliases;
          this.activeAliases = new ArrayList<String>(aliases);
@@ -3230,7 +3247,7 @@ index dafc4ed9..c2c19ed4 100644
      }
  
      /**
-@@ -247,7 +247,6 @@ public abstract class Command {
+@@ -245,7 +245,6 @@ public abstract class Command {
          }
          this.nextLabel = name;
          if (!isRegistered()) {
@@ -3239,10 +3256,10 @@ index dafc4ed9..c2c19ed4 100644
              return true;
          }
 diff --git a/src/main/java/org/bukkit/command/FormattedCommandAlias.java b/src/main/java/org/bukkit/command/FormattedCommandAlias.java
-index 2035880e..b8c97a4b 100644
+index d6c8938b..a6ad94ef 100644
 --- a/src/main/java/org/bukkit/command/FormattedCommandAlias.java
 +++ b/src/main/java/org/bukkit/command/FormattedCommandAlias.java
-@@ -10,6 +10,7 @@ public class FormattedCommandAlias extends Command {
+@@ -9,6 +9,7 @@ public class FormattedCommandAlias extends Command {
  
      public FormattedCommandAlias(@NotNull String alias, @NotNull String[] formatStrings) {
          super(alias);
@@ -3250,7 +3267,7 @@ index 2035880e..b8c97a4b 100644
          this.formatStrings = formatStrings;
      }
  
-@@ -114,6 +115,10 @@ public class FormattedCommandAlias extends Command {
+@@ -113,6 +114,10 @@ public class FormattedCommandAlias extends Command {
          return formatString;
      }
  
@@ -3382,10 +3399,18 @@ index 00000000..ca1893e9
 +
 +}
 diff --git a/src/main/java/org/bukkit/command/SimpleCommandMap.java b/src/main/java/org/bukkit/command/SimpleCommandMap.java
-index 1586f648..6a786b8c 100644
+index 81e4fa57..f020cb04 100644
 --- a/src/main/java/org/bukkit/command/SimpleCommandMap.java
 +++ b/src/main/java/org/bukkit/command/SimpleCommandMap.java
-@@ -31,7 +31,7 @@ public class SimpleCommandMap implements CommandMap {
+@@ -15,7 +15,6 @@ import org.bukkit.command.defaults.BukkitCommand;
+ import org.bukkit.command.defaults.HelpCommand;
+ import org.bukkit.command.defaults.PluginsCommand;
+ import org.bukkit.command.defaults.ReloadCommand;
+-import org.bukkit.command.defaults.TimingsCommand;
+ import org.bukkit.command.defaults.VersionCommand;
+ import org.bukkit.entity.Player;
+ import org.bukkit.util.StringUtil;
+@@ -35,7 +34,7 @@ public class SimpleCommandMap implements CommandMap {
          register("bukkit", new VersionCommand("version"));
          register("bukkit", new ReloadCommand("reload"));
          register("bukkit", new PluginsCommand("plugins"));
@@ -3394,15 +3419,15 @@ index 1586f648..6a786b8c 100644
      }
  
      public void setFallbackCommands() {
-@@ -60,6 +60,7 @@ public class SimpleCommandMap implements CommandMap {
-      * {@inheritDoc}
+@@ -67,6 +66,7 @@ public class SimpleCommandMap implements CommandMap {
       */
+     @Override
      public boolean register(@NotNull String label, @NotNull String fallbackPrefix, @NotNull Command command) {
 +        command.timings = co.aikar.timings.TimingsManager.getCommandTiming(fallbackPrefix, command); // Paper
          label = label.toLowerCase(java.util.Locale.ENGLISH).trim();
          fallbackPrefix = fallbackPrefix.toLowerCase(java.util.Locale.ENGLISH).trim();
          boolean registered = register(label, command, false, fallbackPrefix);
-@@ -135,16 +136,22 @@ public class SimpleCommandMap implements CommandMap {
+@@ -143,16 +143,22 @@ public class SimpleCommandMap implements CommandMap {
              return false;
          }
  
@@ -3431,18 +3456,18 @@ index 1586f648..6a786b8c 100644
  
 diff --git a/src/main/java/org/bukkit/command/defaults/TimingsCommand.java b/src/main/java/org/bukkit/command/defaults/TimingsCommand.java
 deleted file mode 100644
-index 1e6e7033..00000000
+index 6023e4f6..00000000
 --- a/src/main/java/org/bukkit/command/defaults/TimingsCommand.java
 +++ /dev/null
-@@ -1,255 +0,0 @@
+@@ -1,253 +0,0 @@
 -package org.bukkit.command.defaults;
 -
+-import com.google.common.collect.ImmutableList;
 -import java.io.File;
 -import java.io.IOException;
 -import java.io.PrintStream;
 -import java.util.ArrayList;
 -import java.util.List;
--
 -import org.apache.commons.lang.Validate;
 -import org.bukkit.Bukkit;
 -import org.bukkit.ChatColor;
@@ -3453,21 +3478,19 @@ index 1e6e7033..00000000
 -import org.bukkit.plugin.RegisteredListener;
 -import org.bukkit.plugin.TimedRegisteredListener;
 -import org.bukkit.util.StringUtil;
--
--import com.google.common.collect.ImmutableList;
 -import org.jetbrains.annotations.NotNull;
 -
 -// Spigot start
+-// CHECKSTYLE:OFF
 -import java.io.ByteArrayOutputStream;
 -import java.io.OutputStream;
 -import java.net.HttpURLConnection;
 -import java.net.URL;
--import java.net.URLEncoder;
 -import java.util.logging.Level;
--
 -import org.bukkit.command.RemoteConsoleCommandSender;
 -import org.bukkit.plugin.SimplePluginManager;
 -import org.spigotmc.CustomTimingsHandler;
+-// CHECKSTYLE:ON
 -// Spigot end
 -
 -public class TimingsCommand extends BukkitCommand {
@@ -3691,10 +3714,10 @@ index 1e6e7033..00000000
 -    // Spigot end
 -}
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index 97504e6f..777994f7 100644
+index 010b4675..63c6d6a1 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -1566,6 +1566,11 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+@@ -1554,6 +1554,11 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
          public void sendMessage(@NotNull net.md_5.bungee.api.ChatMessageType position, @NotNull net.md_5.bungee.api.chat.BaseComponent... components) {
              throw new UnsupportedOperationException("Not supported yet.");
          }
@@ -3707,10 +3730,10 @@ index 97504e6f..777994f7 100644
  
      @NotNull
 diff --git a/src/main/java/org/bukkit/plugin/SimplePluginManager.java b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
-index 76137a80..fe572551 100644
+index 2dfb8529..53e5045f 100644
 --- a/src/main/java/org/bukkit/plugin/SimplePluginManager.java
 +++ b/src/main/java/org/bukkit/plugin/SimplePluginManager.java
-@@ -297,7 +297,6 @@ public final class SimplePluginManager implements PluginManager {
+@@ -298,7 +298,6 @@ public final class SimplePluginManager implements PluginManager {
              }
          }
  
@@ -3718,7 +3741,7 @@ index 76137a80..fe572551 100644
          return result.toArray(new Plugin[result.size()]);
      }
  
-@@ -335,7 +334,7 @@ public final class SimplePluginManager implements PluginManager {
+@@ -337,7 +336,7 @@ public final class SimplePluginManager implements PluginManager {
  
          if (result != null) {
              plugins.add(result);
@@ -3727,16 +3750,16 @@ index 76137a80..fe572551 100644
          }
  
          return result;
-@@ -362,7 +361,7 @@ public final class SimplePluginManager implements PluginManager {
-      */
+@@ -365,7 +364,7 @@ public final class SimplePluginManager implements PluginManager {
+     @Override
      @Nullable
      public synchronized Plugin getPlugin(@NotNull String name) {
 -        return lookupNames.get(name.replace(' ', '_'));
 +        return lookupNames.get(name.replace(' ', '_').toLowerCase(java.util.Locale.ENGLISH)); // Paper
      }
  
-     @NotNull
-@@ -561,7 +560,8 @@ public final class SimplePluginManager implements PluginManager {
+     @Override
+@@ -586,7 +585,8 @@ public final class SimplePluginManager implements PluginManager {
              throw new IllegalPluginAccessException("Plugin attempted to register " + event + " while not enabled");
          }
  
@@ -3746,16 +3769,16 @@ index 76137a80..fe572551 100644
              getEventListeners(event).register(new TimedRegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
          } else {
              getEventListeners(event).register(new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
-@@ -744,7 +744,7 @@ public final class SimplePluginManager implements PluginManager {
-     }
+@@ -783,7 +783,7 @@ public final class SimplePluginManager implements PluginManager {
  
+     @Override
      public boolean useTimings() {
 -        return useTimings;
 +        return co.aikar.timings.Timings.isTimingsEnabled(); // Spigot
      }
  
      /**
-@@ -753,6 +753,6 @@ public final class SimplePluginManager implements PluginManager {
+@@ -792,6 +792,6 @@ public final class SimplePluginManager implements PluginManager {
       * @param use True if per event timing code should be used
       */
      public void useTimings(boolean use) {
@@ -3764,10 +3787,10 @@ index 76137a80..fe572551 100644
      }
  }
 diff --git a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
-index 56f93336..5b29076f 100644
+index 1173e433..82e379d1 100644
 --- a/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
 +++ b/src/main/java/org/bukkit/plugin/java/JavaPluginLoader.java
-@@ -54,7 +54,6 @@ public final class JavaPluginLoader implements PluginLoader {
+@@ -53,7 +53,6 @@ public final class JavaPluginLoader implements PluginLoader {
      private final Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$"), };
      private final Map<String, Class<?>> classes = new ConcurrentHashMap<String, Class<?>>();
      private final List<PluginClassLoader> loaders = new CopyOnWriteArrayList<PluginClassLoader>();
@@ -3775,14 +3798,15 @@ index 56f93336..5b29076f 100644
  
      /**
       * This class was not meant to be constructed explicitly
-@@ -299,26 +298,20 @@ public final class JavaPluginLoader implements PluginLoader {
+@@ -302,27 +301,21 @@ public final class JavaPluginLoader implements PluginLoader {
                  }
              }
  
 -            final CustomTimingsHandler timings = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + listener.getClass().getName() + "::" + method.getName()+"("+eventClass.getSimpleName()+")", pluginParentTimer); // Spigot
 -            EventExecutor executor = new EventExecutor() {
--                public void execute(@NotNull Listener listener, @NotNull Event event) throws EventException {
 +            EventExecutor executor = new co.aikar.timings.TimedEventExecutor(new EventExecutor() { // Paper
+                 @Override
+-                public void execute(@NotNull Listener listener, @NotNull Event event) throws EventException {
 +                public void execute(@NotNull Listener listener, @NotNull Event event) throws EventException { // Paper
                      try {
                          if (!eventClass.isAssignableFrom(event.getClass())) {
@@ -3806,10 +3830,10 @@ index 56f93336..5b29076f 100644
                  eventSet.add(new TimedRegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
              } else {
 diff --git a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
-index 541d8ee6..c39fcac5 100644
+index 0ffc1dfd..b859796b 100644
 --- a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
 +++ b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
-@@ -25,7 +25,8 @@ import org.jetbrains.annotations.Nullable;
+@@ -24,7 +24,8 @@ import org.jetbrains.annotations.Nullable;
  /**
   * A ClassLoader for plugins, to allow shared classes across multiple plugins
   */
@@ -3843,7 +3867,7 @@ index 5ca863b3..612958a3 100644
 +
 +}
 diff --git a/src/main/java/org/spigotmc/CustomTimingsHandler.java b/src/main/java/org/spigotmc/CustomTimingsHandler.java
-index 6a8f7f55..3cbe5c2b 100644
+index b71235f6..3cbe5c2b 100644
 --- a/src/main/java/org/spigotmc/CustomTimingsHandler.java
 +++ b/src/main/java/org/spigotmc/CustomTimingsHandler.java
 @@ -1,3 +1,26 @@
@@ -3940,7 +3964,7 @@ index 6a8f7f55..3cbe5c2b 100644
 -    /**
 -     * Prints the timings and extra data to the given stream.
 -     *
--     * @param printStream
+-     * @param printStream output stream
 -     */
 -    public static void printTimings(@NotNull PrintStream printStream)
 -    {
@@ -4090,5 +4114,5 @@ index 6a8f7f55..3cbe5c2b 100644
 +
  }
 -- 
-2.21.0
+2.24.0
 

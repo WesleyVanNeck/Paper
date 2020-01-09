@@ -1,49 +1,54 @@
-From 478b9e5309586023d078cba0bc4b0d22a129f686 Mon Sep 17 00:00:00 2001
+From bade12a066ada64083a1daf5fc32fb5a14b6bf68 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Tue, 1 Mar 2016 13:09:16 -0600
 Subject: [PATCH] Configurable baby zombie movement speed
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 098bd3fba8..55d8e74f82 100644
+index 098bd3fba..912611cf1 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -73,4 +73,10 @@ public class PaperWorldConfig {
+@@ -73,4 +73,15 @@ public class PaperWorldConfig {
          log("Max height for cactus growth " + cactusMaxHeight + ". Max height for reed growth " + reedMaxHeight);
  
      }
 +
-+    public double babyZombieMovementSpeed;
-+    private void babyZombieMovementSpeed() {
-+        babyZombieMovementSpeed = getDouble("baby-zombie-movement-speed", 0.5D); // Player moves at 0.1F, for reference
-+        log("Baby zombies will move at the speed of " + babyZombieMovementSpeed);
++    public double babyZombieMovementModifier;
++    private void babyZombieMovementModifier() {
++        babyZombieMovementModifier = getDouble("baby-zombie-movement-modifier", 0.5D);
++        if (PaperConfig.version < 20) {
++            babyZombieMovementModifier = getDouble("baby-zombie-movement-speed", 0.5D);
++            set("baby-zombie-movement-modifier", babyZombieMovementModifier);
++        }
++
++        log("Baby zombies will move at the speed of " + babyZombieMovementModifier);
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/EntityZombie.java b/src/main/java/net/minecraft/server/EntityZombie.java
-index e3d52e7cf7..002be7f7be 100644
+index de818d618..6333d2234 100644
 --- a/src/main/java/net/minecraft/server/EntityZombie.java
 +++ b/src/main/java/net/minecraft/server/EntityZombie.java
-@@ -18,7 +18,7 @@ public class EntityZombie extends EntityMonster {
+@@ -21,7 +21,7 @@ public class EntityZombie extends EntityMonster {
  
-     protected static final IAttribute c = (new AttributeRanged((IAttribute) null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).a("Spawn Reinforcements Chance");
-     private static final UUID a = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
--    private static final AttributeModifier b = new AttributeModifier(EntityZombie.a, "Baby speed boost", 0.5D, 1);
-+    private final AttributeModifier babyModifier = new AttributeModifier(EntityZombie.a, "Baby speed boost", world.paperConfig.babyZombieMovementSpeed, 1); // Paper - Remove static - Make baby speed configurable
-     private static final DataWatcherObject<Boolean> bC = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.i);
-     private static final DataWatcherObject<Integer> bD = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.b);
-     private static final DataWatcherObject<Boolean> bE = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.i);
+     protected static final IAttribute d = (new AttributeRanged((IAttribute) null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).a("Spawn Reinforcements Chance");
+     private static final UUID b = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+-    private static final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", 0.5D, AttributeModifier.Operation.MULTIPLY_BASE);
++    private final AttributeModifier c = new AttributeModifier(EntityZombie.b, "Baby speed boost", world.paperConfig.babyZombieMovementModifier, AttributeModifier.Operation.MULTIPLY_BASE); private final AttributeModifier babyModifier = this.c; // Paper - remove static - Make baby speed configurable
+     private static final DataWatcherObject<Boolean> bw = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.i);
+     private static final DataWatcherObject<Integer> bx = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.b);
+     public static final DataWatcherObject<Boolean> DROWN_CONVERTING = DataWatcher.a(EntityZombie.class, DataWatcherRegistry.i);
 @@ -129,9 +129,9 @@ public class EntityZombie extends EntityMonster {
          if (this.world != null && !this.world.isClientSide) {
              AttributeInstance attributeinstance = this.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED);
  
--            attributeinstance.c(EntityZombie.b);
-+            attributeinstance.c(this.babyModifier); // Paper
+-            attributeinstance.removeModifier(EntityZombie.c);
++            attributeinstance.removeModifier(this.babyModifier); // Paper
              if (flag) {
--                attributeinstance.b(EntityZombie.b);
-+                attributeinstance.b(this.babyModifier); // Paper
+-                attributeinstance.addModifier(EntityZombie.c);
++                attributeinstance.addModifier(this.babyModifier); // Paper
              }
          }
  
 -- 
-2.20.1
+2.24.0
 

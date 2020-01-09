@@ -1,4 +1,4 @@
-From ce9840a8f99f46154e941de2d8560f0333f459a8 Mon Sep 17 00:00:00 2001
+From 6cb23c0849c8579aecb73ffe391df83526bd6281 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 4 Jul 2018 01:40:13 -0400
 Subject: [PATCH] Add MinecraftKey Information to Objects
@@ -6,23 +6,23 @@ Subject: [PATCH] Add MinecraftKey Information to Objects
 Stores the reference to the objects respective MinecraftKey
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperCommand.java b/src/main/java/com/destroystokyo/paper/PaperCommand.java
-index 2e79b0b5f..f38179e98 100644
+index db899937b..eecf27370 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperCommand.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperCommand.java
-@@ -175,7 +175,7 @@ public class PaperCommand extends Command {
- 
-                 List<Entity> entities = world.entityList;
-                 entities.forEach(e -> {
+@@ -178,7 +178,7 @@ public class PaperCommand extends Command {
+                     if (!e.isChunkLoaded()) {
+                         return;
+                     }
 -                    MinecraftKey key = new MinecraftKey(""); // TODO: update in next patch
 +                    MinecraftKey key = e.getMinecraftKey();
  
                      MutablePair<Integer, Map<ChunkCoordIntPair, Integer>> info = list.computeIfAbsent(key, k -> MutablePair.of(0, Maps.newHashMap()));
                      ChunkCoordIntPair chunk = new ChunkCoordIntPair(e.getChunkX(), e.getChunkZ());
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index cd998fcfb..d9c9748ce 100644
+index da19b682a..a203f5d14 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -44,7 +44,7 @@ import org.bukkit.event.entity.EntityPortalEvent;
+@@ -49,7 +49,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  import org.bukkit.plugin.PluginManager;
  // CraftBukkit end
  
@@ -31,16 +31,7 @@ index cd998fcfb..d9c9748ce 100644
  
      // CraftBukkit start
      private static final int CURRENT_LEVEL = 2;
-@@ -72,7 +72,7 @@ public abstract class Entity implements INamableTileEntity, ICommandListener {
-     private static final AxisAlignedBB b = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
-     private static double c = 1.0D;
-     private static int entityCount;
--    private final EntityTypes<?> g;
-+    private final EntityTypes<?> g; public EntityTypes<?> getEntityType() { return g; } // Paper - OBFHELPER
-     private int id;
-     public boolean j;
-     public final List<Entity> passengers;
-@@ -1775,12 +1775,29 @@ public abstract class Entity implements INamableTileEntity, ICommandListener {
+@@ -1708,12 +1708,31 @@ public abstract class Entity implements INamableTileEntity, ICommandListener {
          return true;
      }
  
@@ -64,27 +55,26 @@ index cd998fcfb..d9c9748ce 100644
 +    }
      @Nullable
      public final String getSaveID() {
--        EntityTypes<?> entitytypes = this.P();
--        MinecraftKey minecraftkey = EntityTypes.getName(entitytypes);
--
+         EntityTypes<?> entitytypes = this.getEntityType();
+         MinecraftKey minecraftkey = EntityTypes.getName(entitytypes);
+ 
 -        return entitytypes.a() && minecraftkey != null ? minecraftkey.toString() : null;
-+        EntityTypes type = this.getEntityType();
-+        return type != null && type.isPersistable() ? getMinecraftKeyString() : null;
++        return entitytypes != null && entitytypes.isPersistable() ? getMinecraftKeyString() : null;
 +        // Paper end
      }
  
      protected abstract void a(NBTTagCompound nbttagcompound);
 diff --git a/src/main/java/net/minecraft/server/EntityTypes.java b/src/main/java/net/minecraft/server/EntityTypes.java
-index a07ee150c..d74bfa120 100644
+index 755d34e61..d49ad0308 100644
 --- a/src/main/java/net/minecraft/server/EntityTypes.java
 +++ b/src/main/java/net/minecraft/server/EntityTypes.java
-@@ -240,6 +240,7 @@ public class EntityTypes<T extends Entity> {
+@@ -237,6 +237,7 @@ public class EntityTypes<T extends Entity> {
          }
      }
  
 +    public boolean isPersistable() { return a(); } // Paper - OBFHELPER
      public boolean a() {
-         return this.aU;
+         return this.bc;
      }
 diff --git a/src/main/java/net/minecraft/server/KeyedObject.java b/src/main/java/net/minecraft/server/KeyedObject.java
 new file mode 100644
@@ -102,25 +92,29 @@ index 000000000..743142d03
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/TileEntity.java b/src/main/java/net/minecraft/server/TileEntity.java
-index 62b6e6eb3..7390061bf 100644
+index 40752f761..9071bb7ec 100644
 --- a/src/main/java/net/minecraft/server/TileEntity.java
 +++ b/src/main/java/net/minecraft/server/TileEntity.java
-@@ -7,11 +7,11 @@ import org.apache.logging.log4j.Logger;
+@@ -11,7 +11,7 @@ import org.bukkit.inventory.InventoryHolder;
+ // CraftBukkit end
  import org.spigotmc.CustomTimingsHandler; // Spigot
- import org.bukkit.inventory.InventoryHolder; // CraftBukkit
  
 -public abstract class TileEntity {
 +public abstract class TileEntity implements KeyedObject { // Paper
  
      public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.SpigotTimings.getTileEntityTimings(this); // Spigot
-     private static final Logger a = LogManager.getLogger();
--    private final TileEntityTypes<?> e;
-+    private final TileEntityTypes<?> e; public TileEntityTypes getTileEntityType() { return e; } // Paper - OBFHELPER
+     // CraftBukkit start - data containers
+@@ -19,7 +19,7 @@ public abstract class TileEntity {
+     public CraftPersistentDataContainer persistentDataContainer;
+     // CraftBukkit end
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private final TileEntityTypes<?> tileType;
++    private final TileEntityTypes<?> tileType; public TileEntityTypes getTileEntityType() { return tileType; } // Paper - OBFHELPER
+     @Nullable
      protected World world;
      protected BlockPosition position;
-     protected boolean d;
-@@ -23,6 +23,26 @@ public abstract class TileEntity {
-         this.e = tileentitytypes;
+@@ -33,6 +33,26 @@ public abstract class TileEntity {
+         this.tileType = tileentitytypes;
      }
  
 +    // Paper start
@@ -147,5 +141,5 @@ index 62b6e6eb3..7390061bf 100644
      public World getWorld() {
          return this.world;
 -- 
-2.21.0
+2.24.0
 

@@ -1,14 +1,14 @@
-From 1db25ac54ccde81938bb34496f242edb1f50a4ef Mon Sep 17 00:00:00 2001
+From ae39546f7311f4271e399ee78803c75ea67c0f7e Mon Sep 17 00:00:00 2001
 From: Sudzzy <originmc@outlook.com>
 Date: Wed, 2 Mar 2016 23:34:44 -0600
 Subject: [PATCH] Configurable container update tick rate
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 7c16ec997..4266a87fe 100644
+index 2e9bbc7e9..6c775986d 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -179,4 +179,9 @@ public class PaperWorldConfig {
+@@ -176,4 +176,9 @@ public class PaperWorldConfig {
      private void mobSpawnerTickRate() {
          mobSpawnerTickRate = getInt("mob-spawner-tick-rate", 1);
      }
@@ -19,25 +19,25 @@ index 7c16ec997..4266a87fe 100644
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index c4a55c6a1..2665faa6c 100644
+index eecdade96..55e8174bf 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -68,6 +68,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
-     public boolean f;
+@@ -72,6 +72,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+     public boolean e;
      public int ping;
      public boolean viewingCredits;
 +    private int containerUpdateDelay; // Paper
  
      // CraftBukkit start
      public String displayName;
-@@ -332,7 +333,12 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -351,7 +352,12 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
              --this.noDamageTicks;
          }
  
--        this.activeContainer.b();
+-        this.activeContainer.c();
 +        // Paper start - Configurable container update tick rate
 +        if (--containerUpdateDelay <= 0) {
-+            this.activeContainer.b();
++            this.activeContainer.c();
 +            containerUpdateDelay = world.paperConfig.containerUpdateTickRate;
 +        }
 +        // Paper end
@@ -45,5 +45,5 @@ index c4a55c6a1..2665faa6c 100644
              this.closeInventory();
              this.activeContainer = this.defaultContainer;
 -- 
-2.21.0
+2.23.0
 

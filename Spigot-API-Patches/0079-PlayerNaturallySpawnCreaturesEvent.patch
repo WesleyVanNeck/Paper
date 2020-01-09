@@ -1,4 +1,4 @@
-From 1f5cbf18a8beea7d63e03e6c2fb786985f581f03 Mon Sep 17 00:00:00 2001
+From fb78151fa68d3a9ab9cb2cf3659a02595560a03b Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 14 Jan 2018 17:31:37 -0500
 Subject: [PATCH] PlayerNaturallySpawnCreaturesEvent

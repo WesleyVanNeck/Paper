@@ -1,0 +1,26 @@
+From f0f2d08f8c81182aab2dc14dc62f513de55f3689 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach@zachbr.io>
+Date: Wed, 2 Oct 2019 21:24:28 -0500
+Subject: [PATCH] Name the specific custom world gen plugin class that throws a
+ UOE
+
+
+diff --git a/src/main/java/org/bukkit/generator/ChunkGenerator.java b/src/main/java/org/bukkit/generator/ChunkGenerator.java
+index 5b847bb3..6c9d313f 100644
+--- a/src/main/java/org/bukkit/generator/ChunkGenerator.java
++++ b/src/main/java/org/bukkit/generator/ChunkGenerator.java
+@@ -109,7 +109,10 @@ public abstract class ChunkGenerator {
+      */
+     @NotNull
+     public ChunkData generateChunkData(@NotNull World world, @NotNull Random random, int x, int z, @NotNull BiomeGrid biome) {
+-        throw new UnsupportedOperationException("Custom generator is missing required method generateChunkData");
++        // Paper start - More helpful custom chunk gen exceptions
++        final String generatorClass = world.getGenerator() != null ? world.getGenerator().getClass().getName() : "null";
++        throw new UnsupportedOperationException("Custom generator is missing required method generateChunkData: " + generatorClass);
++        // Paper end
+     }
+ 
+     /**
+-- 
+2.24.1
+

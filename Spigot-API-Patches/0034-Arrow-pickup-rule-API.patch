@@ -1,17 +1,17 @@
-From 2286649eb07e4a21436f8d660059dd6fa2f47641 Mon Sep 17 00:00:00 2001
+From fc20f0c50630c3172e924b34dfa1e912b8728a74 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Fri, 4 Mar 2016 03:13:18 -0500
 Subject: [PATCH] Arrow pickup rule API
 
 
-diff --git a/src/main/java/org/bukkit/entity/Arrow.java b/src/main/java/org/bukkit/entity/Arrow.java
-index 99f73a2b..b63f2fd9 100644
---- a/src/main/java/org/bukkit/entity/Arrow.java
-+++ b/src/main/java/org/bukkit/entity/Arrow.java
-@@ -149,4 +149,38 @@ public interface Arrow extends Projectile {
-     @Override
-     Spigot spigot();
-     // Spigot end
+diff --git a/src/main/java/org/bukkit/entity/AbstractArrow.java b/src/main/java/org/bukkit/entity/AbstractArrow.java
+index 88cebc00..b2bf62a5 100644
+--- a/src/main/java/org/bukkit/entity/AbstractArrow.java
++++ b/src/main/java/org/bukkit/entity/AbstractArrow.java
+@@ -127,4 +127,38 @@ public interface AbstractArrow extends Projectile {
+          */
+         CREATIVE_ONLY
+     }
 +
 +    // Paper start
 +    /**
@@ -48,5 +48,5 @@ index 99f73a2b..b63f2fd9 100644
 +    // Paper end
  }
 -- 
-2.21.0
+2.22.0
 

@@ -1,0 +1,40 @@
+From e0d4cb66f977db1a360ec9c70b9d5147e587f7c9 Mon Sep 17 00:00:00 2001
+From: Joseph Hirschfeld <joe@ibj.io>
+Date: Thu, 3 Mar 2016 02:46:17 -0600
+Subject: [PATCH] Add configurable portal search radius
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+index 62e793b71..5de4ec052 100644
+--- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
++++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
+@@ -191,4 +191,9 @@ public class PaperWorldConfig {
+     private void allChunksAreSlimeChunks() {
+         allChunksAreSlimeChunks = getBoolean("all-chunks-are-slime-chunks", false);
+     }
++
++    public int portalSearchRadius;
++    private void portalSearchRadius() {
++        portalSearchRadius = getInt("portal-search-radius", 128);
++    }
+ }
+diff --git a/src/main/java/net/minecraft/server/PortalTravelAgent.java b/src/main/java/net/minecraft/server/PortalTravelAgent.java
+index 192ddb90a..25b694e7d 100644
+--- a/src/main/java/net/minecraft/server/PortalTravelAgent.java
++++ b/src/main/java/net/minecraft/server/PortalTravelAgent.java
+@@ -39,10 +39,10 @@ public class PortalTravelAgent {
+     public ShapeDetector.Shape a(BlockPosition blockposition, Vec3D vec3d, EnumDirection enumdirection, double d0, double d1, boolean flag) {
+         VillagePlace villageplace = this.world.B();
+ 
+-        villageplace.a(this.world, blockposition, 128);
++        villageplace.a(this.world, blockposition, world.paperConfig.portalSearchRadius); // Paper - TODO: VALIDATE
+         List<VillagePlaceRecord> list = (List) villageplace.b((villageplacetype) -> {
+             return villageplacetype == VillagePlaceType.u;
+-        }, blockposition, 128, VillagePlace.Occupancy.ANY).collect(Collectors.toList());
++        }, blockposition, world.paperConfig.portalSearchRadius, VillagePlace.Occupancy.ANY).collect(Collectors.toList()); // Paper - TODO: VALIDATE
+         Optional<VillagePlaceRecord> optional = list.stream().min(Comparator.<VillagePlaceRecord>comparingDouble((villageplacerecord) -> { // CraftBukkit - decompile error
+             return villageplacerecord.f().m(blockposition);
+         }).thenComparingInt((villageplacerecord) -> {
+-- 
+2.24.0
+

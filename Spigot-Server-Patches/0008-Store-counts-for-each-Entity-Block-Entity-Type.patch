@@ -1,4 +1,4 @@
-From dbaafc47c5209214b5bd44396640cbf5da05c453 Mon Sep 17 00:00:00 2001
+From a5904cd023908ab09a645472a4d04300ae07550a Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Wed, 4 Jul 2018 02:13:59 -0400
 Subject: [PATCH] Store counts for each Entity/Block Entity Type
@@ -6,12 +6,12 @@ Subject: [PATCH] Store counts for each Entity/Block Entity Type
 Opens door for future patches to optimize performance
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 95a51ab745..554fbeb071 100644
+index 125d3acdc..dcaf3a509 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -67,15 +67,19 @@ public class Chunk implements IChunkAccess {
-     private int neighbors = 0x1 << 12;
-     public long chunkKey;
+@@ -56,15 +56,19 @@ public class Chunk implements IChunkAccess {
+     }
+ 
      // Paper start
 +    public final co.aikar.util.Counter<String> entityCounts = new co.aikar.util.Counter<>();
 +    public final co.aikar.util.Counter<String> tileEntityCounts = new co.aikar.util.Counter<>();
@@ -29,7 +29,7 @@ index 95a51ab745..554fbeb071 100644
              }
              return replaced;
          }
-@@ -85,6 +89,7 @@ public class Chunk implements IChunkAccess {
+@@ -74,6 +78,7 @@ public class Chunk implements IChunkAccess {
              TileEntity removed = super.remove(key);
              if (removed != null) {
                  removed.setCurrentChunk(null);
@@ -37,15 +37,15 @@ index 95a51ab745..554fbeb071 100644
              }
              return removed;
          }
-@@ -675,6 +680,7 @@ public class Chunk implements IChunkAccess {
+@@ -385,6 +390,7 @@ public class Chunk implements IChunkAccess {
              k = this.entitySlices.length - 1;
          }
  
 +        if (!entity.inChunk || entity.getCurrentChunk() != this) entityCounts.increment(entity.getMinecraftKeyString()); // Paper
          entity.inChunk = true;
          entity.setCurrentChunk(this); // Paper
-         entity.chunkX = this.locX;
-@@ -705,6 +711,7 @@ public class Chunk implements IChunkAccess {
+         entity.chunkX = this.loc.x;
+@@ -416,6 +422,7 @@ public class Chunk implements IChunkAccess {
          if (!this.entitySlices[i].remove(entity)) {
              return;
          }
@@ -54,5 +54,5 @@ index 95a51ab745..554fbeb071 100644
      }
  
 -- 
-2.21.0
+2.24.0
 

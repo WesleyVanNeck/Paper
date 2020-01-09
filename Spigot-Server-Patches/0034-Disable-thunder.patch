@@ -1,14 +1,14 @@
-From 1988234e00e21b0bb7ac4b5ce6b91f6c4f95828a Mon Sep 17 00:00:00 2001
+From b2aec65ac322df62cebdd5deb0cfaa32a2d94714 Mon Sep 17 00:00:00 2001
 From: Sudzzy <originmc@outlook.com>
 Date: Wed, 2 Mar 2016 14:52:43 -0600
 Subject: [PATCH] Disable thunder
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 65a99b2a4..0ba604ffc 100644
+index 25e071718..41436a4ea 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -164,4 +164,9 @@ public class PaperWorldConfig {
+@@ -161,4 +161,9 @@ public class PaperWorldConfig {
      private void disableExplosionKnockback(){
          disableExplosionKnockback = getBoolean("disable-explosion-knockback", false);
      }
@@ -19,18 +19,18 @@ index 65a99b2a4..0ba604ffc 100644
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
-index 5a7087c75..716c3ddb8 100644
+index 0584cd314..387136140 100644
 --- a/src/main/java/net/minecraft/server/WorldServer.java
 +++ b/src/main/java/net/minecraft/server/WorldServer.java
-@@ -474,7 +474,7 @@ public class WorldServer extends World implements IAsyncTaskHandler {
-                 int l;
-                 BlockPosition blockposition;
+@@ -446,7 +446,7 @@ public class WorldServer extends World {
+         gameprofilerfiller.enter("thunder");
+         BlockPosition blockposition;
  
--                if (flag && flag1 && this.random.nextInt(100000) == 0) {
-+                if (!this.paperConfig.disableThunder && flag && flag1 && this.random.nextInt(100000) == 0) { // Paper - Disable thunder
-                     this.m = this.m * 3 + 1013904223;
-                     l = this.m >> 2;
-                     blockposition = this.a(new BlockPosition(j + (l & 15), 0, k + (l >> 8 & 15)));
+-        if (flag && this.U() && this.random.nextInt(100000) == 0) {
++        if (!this.paperConfig.disableThunder && flag && this.U() && this.random.nextInt(100000) == 0) { // Paper - Disable thunder
+             blockposition = this.a(this.a(j, 0, k, 15));
+             if (this.isRainingAt(blockposition)) {
+                 DifficultyDamageScaler difficultydamagescaler = this.getDamageScaler(blockposition);
 -- 
-2.21.0
+2.24.1
 

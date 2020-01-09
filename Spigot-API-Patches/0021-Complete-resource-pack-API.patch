@@ -1,14 +1,14 @@
-From 3006cdc9d1fe4ed39e0cbf17b4a2726245c0efa6 Mon Sep 17 00:00:00 2001
+From c790b30bf69fbd5001c937a33018dd83e72a9153 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 4 Apr 2015 22:59:54 -0400
 Subject: [PATCH] Complete resource pack API
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index 1de43bd33..c237073a3 100644
+index 81677fcd..d1290ab3 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -1212,7 +1212,9 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+@@ -1200,7 +1200,9 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
       * @throws IllegalArgumentException Thrown if the URL is null.
       * @throws IllegalArgumentException Thrown if the URL is too long. The
       *     length restriction is an implementation specific arbitrary value.
@@ -18,9 +18,9 @@ index 1de43bd33..c237073a3 100644
      public void setResourcePack(@NotNull String url);
  
      /**
-@@ -1637,6 +1639,62 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+@@ -1638,6 +1640,62 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
       */
-     public void setViewDistance(int viewDistance);
+     public void openBook(@NotNull ItemStack book);
  
 +    // Paper start
 +    /**
@@ -82,7 +82,7 @@ index 1de43bd33..c237073a3 100644
      public class Spigot extends Entity.Spigot
      {
 diff --git a/src/main/java/org/bukkit/event/player/PlayerResourcePackStatusEvent.java b/src/main/java/org/bukkit/event/player/PlayerResourcePackStatusEvent.java
-index b98195650..4c2102a11 100644
+index b9819565..4c2102a1 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerResourcePackStatusEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerResourcePackStatusEvent.java
 @@ -11,13 +11,32 @@ import org.jetbrains.annotations.NotNull;
@@ -119,5 +119,5 @@ index b98195650..4c2102a11 100644
       * Gets the status of this pack.
       *
 -- 
-2.21.0
+2.24.0
 

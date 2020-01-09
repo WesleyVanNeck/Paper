@@ -1,14 +1,14 @@
-From 320dd5815173fe4d72fc4cdf0477f3fb46b9e86c Mon Sep 17 00:00:00 2001
+From 1c8294dac08d73849157f0321d30fe5eaca25e06 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Tue, 1 Mar 2016 14:14:15 -0600
 Subject: [PATCH] Drop falling block and tnt entities at the specified height
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-index 3f734327c0..1ed58f4bba 100644
+index 8ee2b9bb1..d59b82b7b 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperWorldConfig.java
-@@ -114,4 +114,14 @@ public class PaperWorldConfig {
+@@ -119,4 +119,14 @@ public class PaperWorldConfig {
          keepSpawnInMemory = getBoolean("keep-spawn-loaded", true);
          log("Keep spawn chunk loaded: " + keepSpawnInMemory);
      }
@@ -24,10 +24,10 @@ index 3f734327c0..1ed58f4bba 100644
 +    }
  }
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index e329c2f48a..2b4a784e4d 100644
+index bf059dc86..2c36fc71c 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -1879,6 +1879,7 @@ public abstract class Entity implements INamableTileEntity, ICommandListener, Ke
+@@ -1814,6 +1814,7 @@ public abstract class Entity implements INamableTileEntity, ICommandListener, Ke
          return this.a(itemstack, 0.0F);
      }
  
@@ -36,45 +36,55 @@ index e329c2f48a..2b4a784e4d 100644
      public EntityItem a(ItemStack itemstack, float f) {
          if (itemstack.isEmpty()) {
 diff --git a/src/main/java/net/minecraft/server/EntityFallingBlock.java b/src/main/java/net/minecraft/server/EntityFallingBlock.java
-index 4e4c8cc501..a6eae266de 100644
+index 20cb7dbaf..0342c873a 100644
 --- a/src/main/java/net/minecraft/server/EntityFallingBlock.java
 +++ b/src/main/java/net/minecraft/server/EntityFallingBlock.java
-@@ -86,6 +86,17 @@ public class EntityFallingBlock extends Entity {
+@@ -85,6 +85,16 @@ public class EntityFallingBlock extends Entity {
              }
  
-             this.move(EnumMoveType.SELF, this.motX, this.motY, this.motZ);
+             this.move(EnumMoveType.SELF, this.getMot());
 +
 +            // Paper start - Configurable EntityFallingBlock height nerf
-+            if (this.world.paperConfig.fallingBlockHeightNerf != 0 && this.locY > this.world.paperConfig.fallingBlockHeightNerf) {
-+                if (this.dropItem && this.world.getGameRules().getBoolean("doEntityDrops")) {
-+                    this.dropItem(new ItemStack(block), 0.0F);
++            if (this.world.paperConfig.fallingBlockHeightNerf != 0 && this.locY() > this.world.paperConfig.fallingBlockHeightNerf) {
++                if (this.dropItem && this.world.getGameRules().getBoolean(GameRules.DO_ENTITY_DROPS)) {
++                    this.a(block);
 +                }
 +
 +                this.die();
 +            }
 +            // Paper end
-+
              if (!this.world.isClientSide) {
                  blockposition = new BlockPosition(this);
                  boolean flag = this.block.getBlock() instanceof BlockConcretePowder;
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index 3977498c4b..5dc52b6b89 100644
+index d04212436..33c51dced 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-@@ -57,6 +57,13 @@ public class EntityTNTPrimed extends Entity {
+@@ -54,6 +54,11 @@ public class EntityTNTPrimed extends Entity {
          }
  
-         this.move(EnumMoveType.SELF, this.motX, this.motY, this.motZ);
-+
+         this.move(EnumMoveType.SELF, this.getMot());
 +        // Paper start - Configurable TNT entity height nerf
-+        if (this.world.paperConfig.entityTNTHeightNerf != 0 && this.locY > this.world.paperConfig.entityTNTHeightNerf) {
++        if (this.world.paperConfig.entityTNTHeightNerf != 0 && this.locY() > this.world.paperConfig.entityTNTHeightNerf) {
 +            this.die();
 +        }
 +        // Paper end
-+
-         this.motX *= 0.9800000190734863D;
-         this.motY *= 0.9800000190734863D;
-         this.motZ *= 0.9800000190734863D;
+         this.setMot(this.getMot().a(0.98D));
+         if (this.onGround) {
+             this.setMot(this.getMot().d(0.7D, -0.5D, 0.7D));
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index b26dff0a7..8d803dc68 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -830,7 +830,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+     @Override
+     public void setStatistic(Statistic statistic, EntityType entityType, int newValue) {
+-        Validate.notNull(statistic, "Statistic cannot be null");
++        Validate.notNull(statistic, "TNStatistic cannot be null");
+         Validate.notNull(entityType, "EntityType cannot be null");
+         Validate.isTrue(newValue >= 0, "Value must be greater than or equal to 0");
+         Validate.isTrue(statistic.getType() == Type.ENTITY, "This statistic does not take an EntityType parameter");
 -- 
-2.20.1
+2.17.1
 

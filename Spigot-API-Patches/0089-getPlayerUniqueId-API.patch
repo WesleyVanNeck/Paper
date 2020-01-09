@@ -1,4 +1,4 @@
-From 5a99ab919ced0b8030d9ffd958fc14ebace28152 Mon Sep 17 00:00:00 2001
+From aeee26dcf880c0670381073a9ff2baf808ed7739 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Thu, 22 Mar 2018 01:39:28 -0400
 Subject: [PATCH] getPlayerUniqueId API
@@ -9,10 +9,10 @@ In Offline Mode, will return an Offline UUID
 This is a more performant way to obtain a UUID for a name than loading an OfflinePlayer
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 16fa78b86..19fb0e5d2 100644
+index 161a714e5..0c519c412 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -451,6 +451,20 @@ public final class Bukkit {
+@@ -423,6 +423,20 @@ public final class Bukkit {
          return server.getPlayer(id);
      }
  
@@ -34,10 +34,10 @@ index 16fa78b86..19fb0e5d2 100644
       * Gets the plugin manager for interfacing with plugins.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index edbfa3fdc..1df58f72a 100644
+index 463724e40..8a76df524 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -380,6 +380,18 @@ public interface Server extends PluginMessageRecipient {
+@@ -356,6 +356,18 @@ public interface Server extends PluginMessageRecipient {
      @Nullable
      public Player getPlayer(@NotNull UUID id);
  

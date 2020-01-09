@@ -1,30 +1,14 @@
-From bd7b275c123243666ca49a450f3b5e2146f2fedd Mon Sep 17 00:00:00 2001
+From 2357ec11aeeff0b009a8d7c978218a13f0a566c3 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Wed, 2 Mar 2016 23:45:17 -0600
 Subject: [PATCH] Disable spigot tick limiters
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 20990cbfd..3012580e8 100644
+index 5eff80d35..f4598134e 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1124,11 +1124,10 @@ public abstract class World implements IEntityAccess, GeneratorAccess, IIBlockAc
-         // CraftBukkit start - Use field for loop variable
-         co.aikar.timings.TimingHistory.entityTicks += this.entityList.size(); // Paper
-         int entitiesThisCycle = 0;
--        if (tickPosition < 0) tickPosition = 0;
--        for (entityLimiter.initTick();
--                entitiesThisCycle < entityList.size() && (entitiesThisCycle % 10 != 0 || entityLimiter.shouldContinue());
--                tickPosition++, entitiesThisCycle++) {
--            tickPosition = (tickPosition < entityList.size()) ? tickPosition : 0;
-+        // Paper start - Disable tick limiters
-+        //if (tickPosition < 0) tickPosition = 0;
-+        for (tickPosition = 0; tickPosition < entityList.size(); tickPosition++) {
-+            // Paper end
-             entity = (Entity) this.entityList.get(this.tickPosition);
-             // CraftBukkit end
-             Entity entity1 = entity.getVehicle();
-@@ -1191,9 +1190,7 @@ public abstract class World implements IEntityAccess, GeneratorAccess, IIBlockAc
+@@ -658,9 +658,7 @@ public abstract class World implements GeneratorAccess, AutoCloseable {
          // Spigot start
          // Iterator iterator = this.tileEntityListTick.iterator();
          int tilesThisCycle = 0;
@@ -36,5 +20,5 @@ index 20990cbfd..3012580e8 100644
              TileEntity tileentity = (TileEntity) this.tileEntityListTick.get(tileTickPosition);
              // Spigot start
 -- 
-2.21.0
+2.24.0
 

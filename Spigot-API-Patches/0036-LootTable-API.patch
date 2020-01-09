@@ -1,4 +1,4 @@
-From fe6d16006ce532f553e149aa9943ba4776afad0b Mon Sep 17 00:00:00 2001
+From 57c87e1ca56c7ea43bb0a4eba69000e7ab71a05d Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 1 May 2016 15:19:49 -0400
 Subject: [PATCH] LootTable API
@@ -230,22 +230,23 @@ index 000000000..fd184f13f
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/block/Chest.java b/src/main/java/org/bukkit/block/Chest.java
-index c553891e0..eb475ec84 100644
+index c67d71101..a569c7b63 100644
 --- a/src/main/java/org/bukkit/block/Chest.java
 +++ b/src/main/java/org/bukkit/block/Chest.java
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,7 @@
  package org.bukkit.block;
  
-+import com.destroystokyo.paper.loottable.LootableBlockInventory;
- import org.bukkit.Nameable;
++import com.destroystokyo.paper.loottable.LootableBlockInventory; // Paper
++import org.bukkit.Nameable; // Paper
  import org.bukkit.inventory.Inventory;
  import org.bukkit.loot.Lootable;
-@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.NotNull;
+@@ -7,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  /**
   * Represents a captured state of a chest.
   */
--public interface Chest extends Container, Nameable, Lootable {
-+public interface Chest extends Container, Nameable, LootableBlockInventory { // Paper
+-public interface Chest extends Container, Lootable {
++public interface Chest extends Container, LootableBlockInventory { // Paper
  
      /**
       * Gets the inventory of the chest block represented by this block state.
@@ -270,42 +271,40 @@ index 74cd194c9..07af1a3f0 100644
      /**
       * Gets the BlockProjectileSource object for the dispenser.
 diff --git a/src/main/java/org/bukkit/block/Dropper.java b/src/main/java/org/bukkit/block/Dropper.java
-index 2e8c3f711..47737b590 100644
+index 424392fb5..c76202321 100644
 --- a/src/main/java/org/bukkit/block/Dropper.java
 +++ b/src/main/java/org/bukkit/block/Dropper.java
-@@ -1,12 +1,13 @@
+@@ -1,11 +1,12 @@
  package org.bukkit.block;
  
 +import com.destroystokyo.paper.loottable.LootableBlockInventory;
- import org.bukkit.Nameable;
  import org.bukkit.loot.Lootable;
  
  /**
   * Represents a captured state of a dropper.
   */
--public interface Dropper extends Container, Nameable, Lootable {
-+public interface Dropper extends Container, Nameable, LootableBlockInventory { // Paper
+-public interface Dropper extends Container, Lootable {
++public interface Dropper extends Container, LootableBlockInventory { // Paper
  
      /**
       * Tries to drop a randomly selected item from the dropper's inventory,
 diff --git a/src/main/java/org/bukkit/block/Hopper.java b/src/main/java/org/bukkit/block/Hopper.java
-index 73fce5f33..221123e8c 100644
+index 58e493099..7ade312f1 100644
 --- a/src/main/java/org/bukkit/block/Hopper.java
 +++ b/src/main/java/org/bukkit/block/Hopper.java
-@@ -1,9 +1,10 @@
+@@ -1,8 +1,9 @@
  package org.bukkit.block;
  
 +import com.destroystokyo.paper.loottable.LootableBlockInventory;
- import org.bukkit.Nameable;
  import org.bukkit.loot.Lootable;
  
  /**
   * Represents a captured state of a hopper.
   */
--public interface Hopper extends Container, Nameable, Lootable { }
-+public interface Hopper extends Container, Nameable, LootableBlockInventory { } // Paper
+-public interface Hopper extends Container, Lootable { }
++public interface Hopper extends Container, LootableBlockInventory { } // Paper
 diff --git a/src/main/java/org/bukkit/block/ShulkerBox.java b/src/main/java/org/bukkit/block/ShulkerBox.java
-index 5a6bed64a..8c8811d4d 100644
+index 938f9aead..42f5b4ea3 100644
 --- a/src/main/java/org/bukkit/block/ShulkerBox.java
 +++ b/src/main/java/org/bukkit/block/ShulkerBox.java
 @@ -1,5 +1,6 @@
@@ -313,19 +312,19 @@ index 5a6bed64a..8c8811d4d 100644
  
 +import com.destroystokyo.paper.loottable.LootableBlockInventory;
  import org.bukkit.DyeColor;
- import org.bukkit.Nameable;
  import org.bukkit.loot.Lootable;
-@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.NotNull;
+@@ -7,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  /**
   * Represents a captured state of a ShulkerBox.
   */
--public interface ShulkerBox extends Container, Nameable, Lootable {
-+public interface ShulkerBox extends Container, Nameable, LootableBlockInventory { // Paper
+-public interface ShulkerBox extends Container, Lootable {
++public interface ShulkerBox extends Container, LootableBlockInventory { // Paper
  
      /**
       * Get the {@link DyeColor} corresponding to this ShulkerBox
 diff --git a/src/main/java/org/bukkit/entity/minecart/HopperMinecart.java b/src/main/java/org/bukkit/entity/minecart/HopperMinecart.java
-index 8ced54039..865885501 100644
+index 937b99f87..db69687a7 100644
 --- a/src/main/java/org/bukkit/entity/minecart/HopperMinecart.java
 +++ b/src/main/java/org/bukkit/entity/minecart/HopperMinecart.java
 @@ -1,5 +1,6 @@
@@ -343,7 +342,7 @@ index 8ced54039..865885501 100644
 +public interface HopperMinecart extends Minecart, InventoryHolder, LootableEntityInventory {
  
      /**
-      * Checks whether or not this Minecart will pick up 
+      * Checks whether or not this Minecart will pick up
 diff --git a/src/main/java/org/bukkit/entity/minecart/StorageMinecart.java b/src/main/java/org/bukkit/entity/minecart/StorageMinecart.java
 index 9ea403e6f..238d118f7 100644
 --- a/src/main/java/org/bukkit/entity/minecart/StorageMinecart.java
