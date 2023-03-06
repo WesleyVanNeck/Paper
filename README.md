@@ -5,7 +5,7 @@ High performance Spigot fork that aims to fix gameplay and mechanics inconsisten
 
 [IRC Support and Project Discussion](http://irc.spi.gt/iris/?channels=paper)
 
-[Discord](https://discord.gg/jETyjUw)
+[Discord](https://discord.gg/jETyjUw),
 
 
 Documentation
